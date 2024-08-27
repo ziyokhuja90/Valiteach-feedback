@@ -10,6 +10,29 @@ malumotlar = dict()
 
 @feedback_router.message(F.text == "Fikr qoldirish")
 async def Fikrqoldirish_handler(message : Message , state: FSMContext):
+    await state.set_state(feedback_state.group)
+    await message.answer(text='''Guruhingizning vaqti va kunlarini kiriting
+
+Hurmatli foydalanuvchi, iltimos, guruhingizning dars o'tkaziladigan vaqti va kunlarini kiriting. 
+
+⏰ Misol: Dushanba, Chorshanba , Juma - 15:00''')
+
+
+
+@feedback_router.message(feedback_state.group)
+async def Fikrqoldirish_handler(message : Message , state: FSMContext):
+    malumotlar['group'] = message.text
+    await state.set_state(feedback_state.teacher_name)
+    await message.answer(text='''O'qituvchingizning ismini kiriting
+
+Hurmatli foydalanuvchi, iltimos, dars o'tayotgan o'qituvchingizning ismini kiriting. Bu ma'lumot bizga sizning fikr-mulohazalaringizni to'g'ri odamga yo'naltirishda yordam beradi.
+
+📋 Misol: Ism Familiya''')
+
+
+@feedback_router.message(feedback_state.teacher_name)
+async def Fikrqoldirish_handler(message : Message , state: FSMContext):
+    malumotlar['teacher_name'] = message.text
     await state.set_state(feedback_state.teacher_p)
     await message.answer(text='''Sizning o'qituvchingiz haqida fikringiz qanday?
 
@@ -33,7 +56,7 @@ Hurmatli foydalanuvchi, biz barcha fikr-mulohazalaringizni eshitishni xohlaymiz.
 async def teacher_n_handler(message: Message , state: FSMContext):
     malumotlar['teacher_n'] = message.text
     await state.set_state(feedback_state.teacher_score)
-    await message.answer(text="""O'qituvchingizga baho bering va uninig ismini kiriting
+    await message.answer(text="""O'qituvchingizga baho bering
 
 Hurmatli foydalanuvchi, iltimos, o'qituvchingizga 0 dan 10 gacha baho bering. Sizning bahoingiz o'qituvchining darslarni qanday o'tayotgani va umumiy ish faoliyatini baholashga yordam beradi.
 
@@ -59,11 +82,29 @@ Hurmatli foydalanuvchi, biz o'quv markazimizni yanada yaxshilash uchun sizning t
 @feedback_router.message(feedback_state.valiteach)
 async def valiteach_handler(message: Message , state: FSMContext):
     malumotlar['valiteach'] = message.text
+    feedback_message = f"""
+📋 <b>Foydalanuvchidan yangi fikr-mulohaza:</b>
+
+📅 <b>Guruhning vaqti va kunlari:</b>
+{malumotlar['group']}
+
+👩‍🏫 <b>O'qituvchining ismi:</b>
+{malumotlar['teacher_name']}
+
+👍 <b>O'qituvchi haqida ijobiy fikr:</b>
+{malumotlar['teacher_p']}
+
+👎 <b>O'qituvchi haqida tanqid:</b>
+{malumotlar['teacher_n']}
+
+🔢 <b>O'qituvchiga berilgan baho:</b>
+{malumotlar['teacher_score']}/10
+
+💡 <b>O'quv markaziga takliflar:</b>
+{malumotlar['valiteach']}
+    """
     await state.clear()
-    await bot.send_message(chat_id='@valiteach_feedback' , text=f"""<b>O'qituvchi haqida ijobiy fikr</b>: {malumotlar['teacher_p']}
-<b>O'qituvchi haqida salbiy fikr</b>: {malumotlar['teacher_n']}
-<b>O'qituvchi ismi va o'qituvchiga 0 dan 10 gacha baho</b>: {malumotlar['teacher_score']}
-<b>Markazga takliflaringiz</b>: {malumotlar['valiteach']}
+    await bot.send_message(chat_id='@valiteach_feedback' , text=f"""{feedback_message}
 """)
     await message.answer(text="""Fikr-mulohazangiz uchun rahmat!
 
