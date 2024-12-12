@@ -8,3 +8,4 @@ class feedback_state(StatesGroup):
     teacher_n = State()
     teacher_score = State()
     valiteach = State()
+    why_valiteach = State()

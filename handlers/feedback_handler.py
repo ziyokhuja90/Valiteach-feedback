@@ -78,31 +78,44 @@ Hurmatli foydalanuvchi, biz o'quv markazimizni yanada yaxshilash uchun sizning t
 
 💡 Sizning takliflaringiz biz uchun juda muhim va o'quv markazimizni yanada samarali qilishga yordam beradi.
 """)
+    
 
 @feedback_router.message(feedback_state.valiteach)
-async def valiteach_handler(message: Message , state: FSMContext):
+async def teacher_score_handler(message: Message , state:FSMContext):
     malumotlar['valiteach'] = message.text
+    await state.set_state(feedback_state.why_valiteach)
+    await message.answer(text="""Qo‘qon shahrida turli o‘quv markazlari bor, lekin siz aynan Valiteach’ni tanladingiz! 🌟 Bu qaroringizga nima sabab bo‘ldi? Fikringiz biz uchun juda muhim! 📝😊
+""")
+    
+
+@feedback_router.message(feedback_state.why_valiteach)
+async def valiteach_handler(message: Message , state: FSMContext):
+    malumotlar['why_valiteach'] = message.text
     feedback_message = f"""
-📋 <b>Foydalanuvchidan yangi fikr-mulohaza:</b>
+📢 <b>Yangi Fikr-Mulohaza</b>
 
-📅 <b>Guruhning vaqti va kunlari:</b>
-{malumotlar['group']}
+📅 <b>📚 Guruh vaqti va kunlari:</b>  
+<b>{malumotlar['group']}</b>
 
-👩‍🏫 <b>O'qituvchining ismi:</b>
-{malumotlar['teacher_name']}
+👩‍🏫 <b>O‘qituvchi:</b>  
+<b>{malumotlar['teacher_name']}</b>
 
-👍 <b>O'qituvchi haqida ijobiy fikr:</b>
+✅ <b>Ijobiy fikrlar:</b>  
 {malumotlar['teacher_p']}
 
-👎 <b>O'qituvchi haqida tanqid:</b>
+⚠️ <b>Tanqidlar:</b>  
 {malumotlar['teacher_n']}
 
-🔢 <b>O'qituvchiga berilgan baho:</b>
-{malumotlar['teacher_score']}/10
+🌟 <b>Berilgan baho:</b>  
+<b>{malumotlar['teacher_score']}/10</b>
 
-💡 <b>O'quv markaziga takliflar:</b>
+💡 <b>Takliflar:</b>  
 {malumotlar['valiteach']}
-    """
+
+🎯 <b>Nega Valiteach?</b>  
+{malumotlar['why_valiteach']}
+"""
+
     await state.clear()
     await bot.send_message(chat_id='@valiteach_feedback' , text=f"""{feedback_message}
 """)
